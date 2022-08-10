@@ -1,7 +1,7 @@
-# djdantic
+# async-tools
 
-A utility library to integrate and use pydantic with the django orm. This package includes optional sentry integration using `sentry-tools`.
+A utility library for using async code in sync and vice versa.
 
 ## TL;DR
 
-`pip install djdantic`
+`pip install async-tools`
