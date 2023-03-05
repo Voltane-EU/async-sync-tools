@@ -1,6 +1,5 @@
 import os
 from typing import Callable, Optional
-from asyncio import coroutine
 from functools import wraps
 from asgiref import sync
 from sentry_tools.decorators import instrument_span
@@ -10,9 +9,7 @@ def sync_to_async(callable: Optional[Callable] = None, **wrapper_kwargs):
     if os.getenv('SYNC_TO_ASYNC_NOT_THREAD_SENSITIVE') and 'thread_sensitive' not in wrapper_kwargs:
         wrapper_kwargs['thread_sensitive'] = False
 
-    @wraps(callable)
-    @instrument_span('sync_to_async')
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         return sync.sync_to_async(
             instrument_span(
                 'sync_to_async.callable',
@@ -23,7 +20,7 @@ def sync_to_async(callable: Optional[Callable] = None, **wrapper_kwargs):
     if callable is None:
         return lambda c: sync_to_async(c, **wrapper_kwargs)
 
-    return coroutine(wrapper)
+    return wrapper
 
 
 def async_to_sync(callable: Optional[Callable] = None, **wrapper_kwargs):

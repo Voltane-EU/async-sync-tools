@@ -1,4 +1,4 @@
-from asyncio import coroutine, get_event_loop
+from asyncio import get_event_loop
 from functools import partial, wraps
 from typing import Callable, Optional
 from sentry_tools.decorators import instrument_span
@@ -19,7 +19,6 @@ def is_async():
 
 
 def _sync_to_async(func):
-    @wraps(func)
     async def run(*args, **kwargs):
         return await get_event_loop().run_in_executor(None, partial(func, *args, **kwargs))
 
@@ -27,9 +26,7 @@ def _sync_to_async(func):
 
 
 def sync_to_async(callable: Optional[Callable] = None, **wrapper_kwargs):
-    @wraps(callable)
-    @instrument_span('asyncio.sync_to_async')
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         return _sync_to_async(
             instrument_span(
                 'asyncio.sync_to_async.callable',
@@ -40,4 +37,4 @@ def sync_to_async(callable: Optional[Callable] = None, **wrapper_kwargs):
     if callable is None:
         return lambda c: sync_to_async(c, **wrapper_kwargs)
 
-    return coroutine(wrapper)
+    return wrapper
